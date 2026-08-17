@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.20.2
+          cache: npm
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -25,10 +26,21 @@ jobs:
           java-version: 17
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          npm install --legacy-peer-deps
+          if [ ! -f package-lock.json ]; then
+            npm install --package-lock-only --legacy-peer-deps
+          fi
 
       - name: Verify gradle-plugin exists
-        run: ls -la node_modules/@react-native/gradle-plugin || echo "MISSING gradle-plugin folder"
+        run: |
+          echo "== resolved version =="
+          npm list @react-native/gradle-plugin || true
+          echo "== folder contents =="
+          ls -la node_modules/@react-native/gradle-plugin || echo "MISSING gradle-plugin folder"
+          echo "== settings.gradle / build.gradle of plugin =="
+          cat node_modules/@react-native/gradle-plugin/settings.gradle.kts 2>/dev/null || echo "no settings.gradle.kts"
+          find node_modules/@react-native/gradle-plugin -maxdepth 2 -iname "*.gradle*"
 
       - name: Fetch official Gradle 8.6 wrapper jar
         run: |
