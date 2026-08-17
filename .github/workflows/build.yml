@@ -41,6 +41,11 @@ jobs:
           cat node_modules/@react-native/gradle-plugin/settings.gradle.kts 2>/dev/null || echo "no settings.gradle.kts"
           find node_modules/@react-native/gradle-plugin -maxdepth 2 -iname "*.gradle*"
 
+      - name: Patch gradle-plugin settings (remove foojay-resolver)
+        run: |
+          sed -i '/foojay-resolver-convention/d' node_modules/@react-native/gradle-plugin/settings.gradle.kts
+          cat node_modules/@react-native/gradle-plugin/settings.gradle.kts
+
       - name: Fetch official Gradle 8.6 wrapper jar
         run: |
           mkdir -p android/gradle/wrapper
