@@ -37,6 +37,11 @@ jobs:
 
       - name: Generate Gradle Wrapper
         run: |
+          echo "--- Checking gradle-plugin folder ---"
+          ls -la node_modules/@react-native/gradle-plugin || echo "MISSING: node_modules/@react-native/gradle-plugin"
+          echo "--- Checking react-native version ---"
+          cat node_modules/react-native/package.json | grep '"version"' || echo "MISSING: react-native package"
+          echo "--- Proceeding to wrapper generation ---"
           cd android
           gradle wrapper --gradle-version 8.6 --distribution-type all
           chmod +x gradlew
