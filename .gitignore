@@ -1,0 +1,32 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# React Native
+.expo/
+*.jsbundle
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/debug.keystore
+android/app/release.keystore
+*.keystore
+!android/app/src/main/res/**
+
+# Gradle wrapper jar is generated in CI, not committed
+android/gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Env
+.env
