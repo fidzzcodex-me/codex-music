@@ -46,6 +46,23 @@ jobs:
           sed -i '/foojay-resolver-convention/d' node_modules/@react-native/gradle-plugin/settings.gradle.kts
           cat node_modules/@react-native/gradle-plugin/settings.gradle.kts
 
+      - name: Debug build gradle-plugin standalone
+        run: |
+          cd node_modules/@react-native/gradle-plugin
+          curl -sSL -o /tmp/gw-standalone.jar https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradle/wrapper/gradle-wrapper.jar
+          mkdir -p gradle/wrapper
+          cp /tmp/gw-standalone.jar gradle/wrapper/gradle-wrapper.jar
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.6-all.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          curl -sSL -o gradlew https://raw.githubusercontent.com/gradle/gradle/v8.6.0/gradlew || true
+          chmod +x gradlew 2>/dev/null || true
+          java -jar gradle/wrapper/gradle-wrapper.jar build --stacktrace 2>&1 | tail -80 || true
+
       - name: Fetch official Gradle 8.6 wrapper jar
         run: |
           mkdir -p android/gradle/wrapper
