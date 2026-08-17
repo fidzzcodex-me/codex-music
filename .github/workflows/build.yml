@@ -1,0 +1,67 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Generate Gradle Wrapper
+        run: |
+          cd android
+          gradle wrapper --gradle-version 8.6
+          chmod +x gradlew
+
+      - name: Generate debug keystore
+        run: |
+          keytool -genkeypair -v \
+            -storetype PKCS12 \
+            -keystore android/app/debug.keystore \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=FidzzMusic Debug,O=Codex,C=ID"
+
+      - name: Build Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FidzzMusic-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: FidzzMusic Build #${{ github.run_number }}
+          files: android/app/build/outputs/apk/release/app-release.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
